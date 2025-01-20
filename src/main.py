@@ -1,5 +1,5 @@
-import shutil
-from model import calculate_file_hash
+from shutil import copytree, copy2
+# from model import calculate_file_hash
 import hashlib
 import os
 import threading
@@ -19,21 +19,21 @@ srcFiles = []
 dstFiles = []
 d = 0
 
-# def calculate_file_hash(file_path, hash_algorithm='sha256', chunk_size=8192):
-#     """
-#     计算文件的哈希值。
-#     :param file_path: 文件路径
-#     :param hash_algorithm: 哈希算法（默认为sha256）
-#     :param chunk_size: 读取文件时的块大小（默认为8192字节）
-#     :return: 文件的哈希值
-#     """
-#     print(file_path)
-#     hash_obj = hashlib.new(hash_algorithm)
-#     with open(file_path, 'rb') as f:
-#         while chunk := f.read(chunk_size):
-#             hash_obj.update(chunk)
+def calculate_file_hash(file_path, hash_algorithm='sha256', chunk_size=8192):
+    """
+    计算文件的哈希值。
+    :param file_path: 文件路径
+    :param hash_algorithm: 哈希算法（默认为sha256）
+    :param chunk_size: 读取文件时的块大小（默认为8192字节）
+    :return: 文件的哈希值
+    """
+    print(file_path)
+    hash_obj = hashlib.new(hash_algorithm)
+    with open(file_path, 'rb') as f:
+        while chunk := f.read(chunk_size):
+            hash_obj.update(chunk)
 
-#     return hash_obj.hexdigest()
+    return hash_obj.hexdigest()
 
 def get_files(srcDir, dstDir):
     for filepath,dirnames,filenames in os.walk(r''+srcDir):
@@ -70,11 +70,13 @@ def get_dir_size(dir):
     return size
 
 def copying(src_dir, dst_dir):
-    threading.Thread(target=shutil.copytree, args=(src_dir, dst_dir)).start()
+    threading.Thread(target=copytree, args=(src_dir, dst_dir,False,None,copy2,False,True)).start()
     
 def __update_progress(dst_dir, src_dir):
     pb["value"] = get_dir_size(dst_dir)
-    if pb["value"] == pb["maximum"]:
+    print(get_dir_size(dst_dir))
+    print(get_dir_size(src_dir))
+    if pb["value"] >= pb["maximum"]:
         gui.after_cancel(__update_progress)
         pb["maximum"] = 100
         pb["value"] = 0
@@ -87,11 +89,10 @@ def __checkHarsh(dst_dir, src_dir, d):
     pb["maximum"] = len(dstFiles)
     pb["value"] = d
     if d  < len(dstFiles):
-        print(calculate_file_hash(srcFiles[d]))
         if (calculate_file_hash(srcFiles[d])) != (calculate_file_hash(dstFiles[d])): 
             # if the hash of the source and destination directories are not the same
             messagebox.showerror(message="The directories("+ srcFiles[d-1] +","+ dstFiles[d-1] +") are not the same,please try again")
-            raise Exception("The directories are not the same,please try again")
+            # raise Exception("The directories are not the same,please try again")
         d = d + 1
         gui.after(100, __checkHarsh, dst_dir, src_dir, d)
     else:
@@ -138,7 +139,7 @@ btn = Button(gui,text="选择",command=openDstFloder)
 btn.grid(row = 2,column = 1)
 # dst_dir = filedialog.askdirectory()
 
-Button(gui,text="确定",command=lambda:copyCard(srcDir.get(),dstDir.get()+time.strftime("%Y-%m-%d-%H%M%S", time.localtime()) )).grid(row = 3,column = 2)
+Button(gui,text="确定",command=lambda:copyCard(srcDir.get(),dstDir.get())).grid(row = 3,column = 2)
 Button(gui,text="取消").grid(row = 3,column = 1)
 
 
