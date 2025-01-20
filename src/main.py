@@ -138,7 +138,7 @@ btn = Button(gui,text="选择",command=openDstFloder)
 btn.grid(row = 2,column = 1)
 # dst_dir = filedialog.askdirectory()
 
-Button(gui,text="确定",command=lambda:copyCard(srcDir.get(),dstDir.get()+time.strftime("%Y-%m-%d-%H%M%S", time.localtime()) )).grid(row = 3,column = 2)
+Button(gui,text="确定",command=lambda:copyCard(srcDir.get(),dstDir.get())).grid(row = 3,column = 2)
 Button(gui,text="取消").grid(row = 3,column = 1)
 
 
