@@ -4,7 +4,7 @@ import hashlib
 import os
 import threading
 import time
-from tkinter import Tk, Button, Image, filedialog, Entry, messagebox, ttk
+from tkinter import Tk, Button, Image, filedialog, Entry, messagebox, ttk, Label
 # from concurrent.futures import ThreadPoolExecutor
 # from concurrent.futures import ProcessPoolExecutor
 
@@ -117,31 +117,30 @@ def copyCard(src_dir, dst_dir):
             
 
 gui.title("Bunny copycard")
-gui.geometry("300x200")
+gui.geometry("500x200")
 
-
-pb = ttk.Progressbar(length=200, mode="determinate")
-pb.grid(row=5, column=2,)
-pb["maximum"] = 100
-pb["value"] = 0
-
-
-# Label(gui,text="请输入文件路径：")
+a = Label(gui,text="请输入文件路径：")
+a.grid(row=1,column=0)
 srcDir = Entry(gui,text="输入文件")
-srcDir.grid(row = 1,column = 2)
+srcDir.grid(row = 1,column = 1)
 btn = Button(gui,text="选择",command=openSrcFloder)
-btn.grid(row = 1,column = 1)
+btn.grid(row = 1,column = 2)
 
-# Label(gui,text="请输入文件路径：")
+b = Label(gui,text="请输入文件路径：")
+b.grid(row=2,column=0)
 dstDir = Entry(gui,text="输出文件")
-dstDir.grid(row = 2,column = 2)
+dstDir.grid(row = 2,column = 1)
 btn = Button(gui,text="选择",command=openDstFloder)
-btn.grid(row = 2,column = 1)
+btn.grid(row = 2,column = 2)
 # dst_dir = filedialog.askdirectory()
 
-Button(gui,text="确定",command=lambda:copyCard(srcDir.get(),dstDir.get())).grid(row = 3,column = 2)
-Button(gui,text="取消").grid(row = 3,column = 1)
-
+Button(gui,text="确定",command=lambda:copyCard(srcDir.get(),dstDir.get())).grid(row = 3,column = 1)
+Button(gui,text="取消",command=lambda:quit()).grid(row = 3,column = 0)
+Label(gui,text="进度：").grid(row=4,column=0)
+pb = ttk.Progressbar(length=200, mode="determinate")
+pb.grid(row=4, column=1,)
+pb["maximum"] = 100
+pb["value"] = 0
 
 gui.mainloop()
 

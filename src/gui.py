@@ -15,18 +15,20 @@ import hashlib
 import os
 import threading
 import time
-from tkinter import Tk, Button, Image, filedialog, Entry, messagebox, ttk
+from tkinter import Tk, Button, Image, filedialog, Entry, messagebox, ttk, Label, Frame
 
-global srcHash, dstHash, srcFiles, dstFiles, d, pbp, pbi, hbp, hbi
-srcHash = []
-dstHash = []
+global srcFileNames, dstFileNames, srcFiles, dstFiles, d, pbp, pbi, hbp, hbi
+srcFileNames = []
+dstFileNames = []
 srcFiles = []
 dstFiles = []
+global ProcessingFileA
+ProcessingFileA = ''
+ProcessingFileB = ''
+ProcessingFileC = ''
+ProcessingFileD = ''
 d = 0
-pbp = 0
-pbi = 100
-hbp = 0
-hbi = 100
+s = 0
 def calculate_file_hash(file_path, hash_algorithm='sha256', chunk_size=8192):
     """
     计算文件的哈希值。
@@ -47,10 +49,15 @@ def get_files(srcDir, dstDir):
     for filepath,dirnames,filenames in os.walk(r''+srcDir):
         for filename in filenames:
             srcFiles.append(os.path.join(filepath,filename))
-
     for filepath,dirnames,filenames in os.walk(r''+dstDir):
         for filename in filenames:
             dstFiles.append(os.path.join(filepath,filename))
+    for filepath,dirnames,filenames in os.walk(r''+srcDir):
+        for filename in filenames:
+            srcFileNames.append(os.path.join(filename))
+    for filepath,dirnames,filenames in os.walk(r''+dstDir):
+        for filename in filenames:
+            dstFileNames.append(os.path.join(filename))
 
 def openSrcFloder():
     folder_path = filedialog.askdirectory() # 打开文件
@@ -70,32 +77,41 @@ def get_dir_size(dir):
     return size
 
 def copying(src_dir, dst_dir):
-    threading.Thread(target=copytree, args=(src_dir, dst_dir,False,None,copy2,False,True)).start()
+    try:
+        threading.Thread(target=copytree, args=(src_dir, dst_dir,False,None,copy2,False,True)).start()
+    except:
+        raise
+
     
 def __update_progress(dst_dir, src_dir):
-    pbp = get_dir_size(dst_dir)
-    print(get_dir_size(dst_dir))
-    print(get_dir_size(src_dir))
-    pbi = 100
-    if pbp >= pbi:
+    pb["maximum"] = get_dir_size(src_dir)
+    pb["value"] = get_dir_size(dst_dir)
+    global ProcessingFileA
+    ProcessingFileA = dst_dir+f"{pb["value"]/1024/1024} MB"
+    if get_dir_size(dst_dir) >= get_dir_size(src_dir):
         window.after_cancel(__update_progress)
-        pbi = 100
-        pbp = 0
         get_files(src_dir, dst_dir)
-        window.after(100, __checkHarsh, dst_dir, src_dir, d)
+        s - 0
+        window.after(100, __checkHarsh, dst_dir, src_dir, d, s)
     else:
         window.after(100, __update_progress, dst_dir, src_dir)
 
-def __checkHarsh(dst_dir, src_dir, d):
-    hbi = len(dstFiles)
-    hbp = d
+def __checkHarsh(dst_dir, src_dir, d, s):
+    hb["maximum"] = len(dstFiles)
+    hb["value"] = d
     if d  < len(dstFiles):
-        if (calculate_file_hash(srcFiles[d])) != (calculate_file_hash(dstFiles[d])): 
-            # if the hash of the source and destination directories are not the same
-            messagebox.showerror(message="The directories("+ srcFiles[d-1] +","+ dstFiles[d-1] +") are not the same,please try again")
-            # raise Exception("The directories are not the same,please try again")
-        d = d + 1
-        window.after(100, __checkHarsh, dst_dir, src_dir, d)
+        print(srcFileNames[s] == dstFileNames[d])
+        if srcFileNames[s] == dstFileNames[d]:
+            if (calculate_file_hash(srcFiles[s])) != (calculate_file_hash(dstFiles[d])): 
+                # if the hash of the source and destination directories are not the same
+                messagebox.showerror(message="The directories("+ srcFiles[d-1] +","+ dstFiles[d-1] +") are not the same,please try again")
+                # raise Exception("The directories are not the same,please try again")
+            else:
+                pass
+            d = d + 1
+        else:
+            s = d + 1
+        window.after(100, __checkHarsh, dst_dir, src_dir, d, s)
     else:
         messagebox.showinfo(message="Copy Completed")
         d = 0
@@ -112,12 +128,12 @@ def copyCard(src_dir, dst_dir):
         messagebox.showerror(message="The source directory does not exist")
     else:
         copying(src_dir, dst_dir)
-        pbi = get_dir_size(src_dir)
+        pb["maximum"] = get_dir_size(src_dir)
         window.after(100, __update_progress, dst_dir, src_dir)
 
 
 OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path(r"I:\FlaskProgram\BunnyCard\build\assets\frame0")
+ASSETS_PATH = OUTPUT_PATH / Path(r"./assets/frame0")
 
 
 def relative_to_assets(path: str) -> Path:
@@ -375,10 +391,20 @@ entry_bg_4 = canvas.create_image(
     648.0,
     image=entry_image_4
 )
-entry_4 = Text(
+
+hb = ttk.Progressbar(length=200, mode="determinate")
+hb["maximum"] = 100
+hb["value"] = 0
+hb.place(
+    x=19.0,
+    y=658.0,
+    width=200.0,
+    height=10.0,
+)
+entry_4 = Label(
     bd=0,
-    bg="#000000",
     fg="#000716",
+    text=int(hb["value"]/hb["maximum"]),
     highlightthickness=0
 )
 entry_4.place(
@@ -388,21 +414,6 @@ entry_4.place(
     height=20.0
 )
 
-
-
-
-hb = ttk.Progressbar(length=200, mode="determinate")
-hb.grid(row=5, column=2,)
-hb["maximum"] = 100
-hb["value"] = hbp/hbi*100
-hb.place(
-    x=19.0,
-    y=658.0,
-    width=200.0,
-    height=10.0,
-)
-
-
 entry_image_5 = PhotoImage(
     file=relative_to_assets("entry_5.png"))
 entry_bg_5 = canvas.create_image(
@@ -410,9 +421,9 @@ entry_bg_5 = canvas.create_image(
     706.0,
     image=entry_image_5
 )
-entry_5 = Text(
+entry_5 = Label(
     bd=0,
-    bg="#000000",
+    text=ProcessingFileC,
     fg="#000716",
     highlightthickness=0
 )
@@ -430,9 +441,9 @@ entry_bg_6 = canvas.create_image(
     737.0,
     image=entry_image_6
 )
-entry_6 = Text(
+entry_6 = Label(
     bd=0,
-    bg="#000000",
+    text=ProcessingFileD,
     fg="#000716",
     highlightthickness=0
 )
@@ -460,6 +471,16 @@ canvas.create_text(
     font=("PingFangSC Medium", 15 * -1)
 )
 
+pb = ttk.Progressbar(length=200, mode="determinate")
+pb["maximum"] = 100
+pb["value"] = 0
+pb.place(
+    x=19.0,
+    y=508.0,
+    width=200.0,
+    height=10.0,
+)
+
 entry_image_7 = PhotoImage(
     file=relative_to_assets("entry_7.png"))
 entry_bg_7 = canvas.create_image(
@@ -467,9 +488,9 @@ entry_bg_7 = canvas.create_image(
     498.0,
     image=entry_image_7
 )
-entry_7 = Text(
+entry_7 = Label(
     bd=0,
-    bg="#000000",
+    text=int(pb["value"]/pb["maximum"]),
     fg="#000716",
     highlightthickness=0
 )
@@ -481,17 +502,6 @@ entry_7.place(
 )
 
 
-pb = ttk.Progressbar(length=200, mode="determinate")
-pb.grid(row=5, column=2,)
-pb["maximum"] = 100
-pb["value"] = pbp/pbi*100
-pb.place(
-    x=19.0,
-    y=508.0,
-    width=200.0,
-    height=10.0,
-)
-
 entry_image_8 = PhotoImage(
     file=relative_to_assets("entry_8.png"))
 entry_bg_8 = canvas.create_image(
@@ -499,9 +509,9 @@ entry_bg_8 = canvas.create_image(
     564.0,
     image=entry_image_8
 )
-entry_8 = Text(
+entry_8 = Label(
     bd=0,
-    bg="#000000",
+    text=ProcessingFileA,
     fg="#000716",
     highlightthickness=0
 )
@@ -519,13 +529,12 @@ entry_bg_9 = canvas.create_image(
     595.0,
     image=entry_image_9
 )
-entry_9 = Text(
+entry_9 = Label(
     bd=0,
-    bg="#000000",
+    text=ProcessingFileB,
     fg="#000716",
     highlightthickness=0
-)
-entry_9.place(
+).place(
     x=16.0,
     y=585.0,
     width=200.0,
