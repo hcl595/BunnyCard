@@ -111,6 +111,9 @@ def __checkHarsh(dst_dir, src_dir, d, s):
             d = d + 1
         else:
             s = d + 1
+        print(srcFileNames[s])
+        print(dstFileNames[d])
+        time.sleep(10000)
         window.after(100, __checkHarsh, dst_dir, src_dir, d, s)
     else:
         messagebox.showinfo(message="Copy Completed")
@@ -502,44 +505,6 @@ entry_7.place(
 )
 
 
-entry_image_8 = PhotoImage(
-    file=relative_to_assets("entry_8.png"))
-entry_bg_8 = canvas.create_image(
-    116.0,
-    564.0,
-    image=entry_image_8
-)
-entry_8 = Label(
-    bd=0,
-    text=ProcessingFileA,
-    fg="#000716",
-    highlightthickness=0
-)
-entry_8.place(
-    x=16.0,
-    y=554.0,
-    width=200.0,
-    height=18.0
-)
-
-entry_image_9 = PhotoImage(
-    file=relative_to_assets("entry_9.png"))
-entry_bg_9 = canvas.create_image(
-    116.0,
-    595.0,
-    image=entry_image_9
-)
-entry_9 = Label(
-    bd=0,
-    text=ProcessingFileB,
-    fg="#000716",
-    highlightthickness=0
-).place(
-    x=16.0,
-    y=585.0,
-    width=200.0,
-    height=18.0
-)
 
 image_image_1 = PhotoImage(
     file=relative_to_assets("image_1.png"))
@@ -580,5 +545,13 @@ button_3.place(
     width=24.0,
     height=22.0
 )
+
+def refresh(ProcessingFileA,ProcessingFileB):
+    entry_8 = Label(bd=0,text=ProcessingFileA,fg="#000716",highlightthickness=0
+    ).place(x=16.0,y=554.0,width=200.0,height=18.0)
+    entry_9 = Label(bd=0,text=ProcessingFileB,fg="#000716",highlightthickness=0
+    ).place(x=16.0,y=585.0,width=200.0,height=18.0)
+    window.after(100, refresh,ProcessingFileA,ProcessingFileB)
+
 window.resizable(False, False)
 window.mainloop()
