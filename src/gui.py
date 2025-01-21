@@ -553,7 +553,5 @@ def refresh(ProcessingFileA,ProcessingFileB):
     ).place(x=16.0,y=585.0,width=200.0,height=18.0)
     window.after(100, refresh,ProcessingFileA,ProcessingFileB)
 
-window.drag_target_
-
 window.resizable(False, False)
 window.mainloop()
